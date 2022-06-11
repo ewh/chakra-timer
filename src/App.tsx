@@ -196,12 +196,14 @@ function App() {
                       .required()
                       .min(0)
                       .max(59)
+                      // eslint-disable-next-line no-template-curly-in-string
                       .typeError('Invalid ${type}: ${value}'),
                     seconds: Yup.number()
                       .integer()
                       .required()
                       .min(0)
                       .max(59)
+                      // eslint-disable-next-line no-template-curly-in-string
                       .typeError('Invalid ${type}: ${value}'),
                   })}
                   onSubmit={(values, actions) => {
