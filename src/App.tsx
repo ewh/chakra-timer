@@ -282,7 +282,7 @@ async function notify() {
     console.log('perm', perm);
   }
   if (Notification.permission === 'granted') {
-    new Notification('Countdown Done', {
+    new Notification(`Countdown Done: ${new Date().toLocaleTimeString()}`, {
       // body: 'Done',
       requireInteraction: true,
     });
