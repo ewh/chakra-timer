@@ -3,7 +3,8 @@
 // import './App.css';
 
 import { useEffect, useState } from 'react';
-import { Field, Form, Formik } from 'formik';
+import { Field, FieldProps, Form, Formik } from 'formik';
+import * as Yup from 'yup';
 
 import {
   Box,
@@ -17,10 +18,16 @@ import {
   HStack,
   Input,
   Icon,
+  Tooltip,
   VStack,
 } from '@chakra-ui/react';
 
-import { MdPauseCircle, MdPlayCircle } from 'react-icons/md';
+import {
+  MdPauseCircle,
+  MdPlayCircle,
+  MdRotateLeft,
+  MdSettings,
+} from 'react-icons/md';
 import { DateTime, Duration, Interval } from 'luxon';
 
 interface Countdown {
@@ -55,6 +62,16 @@ const getRemainingDuration = (
 
 const initialDuration = Duration.fromObject({ minutes: 25, seconds: 0 });
 const refreshInterval = 500;
+
+function MyIcon({ label, icon }: { label: string; icon: any }): any {
+  return (
+    <Tooltip label={label}>
+      <span>
+        <Icon as={icon} />
+      </span>
+    </Tooltip>
+  );
+}
 
 function App() {
   const [defaultDuration, setDefaultDuration] = useState(initialDuration);
@@ -134,9 +151,9 @@ function App() {
                 }}
               >
                 {isRunning ? (
-                  <Icon as={MdPauseCircle} />
+                  <MyIcon label="Pause" icon={MdPauseCircle} />
                 ) : (
-                  <Icon as={MdPlayCircle} />
+                  <MyIcon label="Play" icon={MdPlayCircle} />
                 )}
               </Button>
               <Button
@@ -152,17 +169,17 @@ function App() {
                   }
                 }}
               >
-                Reset
+                <MyIcon label="Reset" icon={MdRotateLeft} />
               </Button>
               <Heading m={2}>{remaining.toFormat('m:ss')}</Heading>
-              <Heading m={2}>{actualRemaining.toFormat('m:ss.SSS')}</Heading>
+              {/* <Heading m={2}>{actualRemaining.toFormat('m:ss.SSS')}</Heading> */}
               <Button
                 m={2}
                 minW="20"
                 isDisabled={isRunning}
                 onClick={() => setFormVisible(!formVisible)}
               >
-                Set
+                <MyIcon label="Settings" icon={MdSettings} />
               </Button>
               {/* <Button onClick={notify}>Notify</Button> */}
             </HStack>
@@ -173,6 +190,20 @@ function App() {
                     minutes: defaultDuration.minutes.toString(),
                     seconds: defaultDuration.seconds.toString(),
                   }}
+                  validationSchema={Yup.object({
+                    minutes: Yup.number()
+                      .integer()
+                      .required()
+                      .min(0)
+                      .max(59)
+                      .typeError('Invalid ${type}: ${value}'),
+                    seconds: Yup.number()
+                      .integer()
+                      .required()
+                      .min(0)
+                      .max(59)
+                      .typeError('Invalid ${type}: ${value}'),
+                  })}
                   onSubmit={(values, actions) => {
                     const { minutes, seconds } = values;
                     const duration = Duration.fromObject({
@@ -188,24 +219,26 @@ function App() {
                 >
                   {(props) => (
                     <Form>
-                      <Field name="minutes" validate={validateTime}>
-                        {({ field, form }: { field: any; form: any }) => (
-                          <FormControl isInvalid={form.errors.minutes}>
+                      <Field name="minutes">
+                        {({ field, form }: FieldProps) => (
+                          <FormControl isInvalid={Boolean(form.errors.minutes)}>
                             <FormLabel htmlFor="minutes">Minutes</FormLabel>
                             <Input {...field} id="minutes" />
                             <FormErrorMessage>
-                              {form.errors.minutes}
+                              {form.touched.minutes &&
+                                form.errors.minutes?.toString()}
                             </FormErrorMessage>
                           </FormControl>
                         )}
                       </Field>
-                      <Field name="seconds" validate={validateTime}>
-                        {({ field, form }: { field: any; form: any }) => (
-                          <FormControl isInvalid={form.errors.seconds}>
+                      <Field name="seconds">
+                        {({ field, form }: FieldProps) => (
+                          <FormControl isInvalid={Boolean(form.errors.seconds)}>
                             <FormLabel htmlFor="seconds">Seconds</FormLabel>
                             <Input {...field} id="seconds" />
                             <FormErrorMessage>
-                              {form.errors.seconds}
+                              {form.touched.seconds &&
+                                form.errors.seconds?.toString()}
                             </FormErrorMessage>
                           </FormControl>
                         )}
@@ -256,13 +289,13 @@ async function notify() {
 
 export default App;
 
-function validateTime(value: string): string | undefined {
-  const num = parseInt(value);
-  if (isNaN(num)) {
-    return 'Illegal';
-  }
-  if (num < 0 || num > 59) {
-    return 'Out of bounds';
-  }
-  return undefined;
-}
+// function validateTime(value: string): string | undefined {
+//   const num = parseInt(value);
+//   if (isNaN(num)) {
+//     return 'Illegal';
+//   }
+//   if (num < 0 || num > 59) {
+//     return 'Out of bounds';
+//   }
+//   return undefined;
+// }
