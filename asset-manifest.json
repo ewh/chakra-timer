@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/chakra-timer/static/css/main.e6c13ad2.css",
+    "main.js": "/chakra-timer/static/js/main.310820bc.js",
+    "index.html": "/chakra-timer/index.html",
+    "main.e6c13ad2.css.map": "/chakra-timer/static/css/main.e6c13ad2.css.map",
+    "main.310820bc.js.map": "/chakra-timer/static/js/main.310820bc.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.310820bc.js"
+  ]
+}
