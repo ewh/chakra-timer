@@ -2,6 +2,7 @@
   "name": "chakra-hack",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://ewh.github.io/chakra-timer/",
   "dependencies": {
     "@chakra-ui/icons": "^2.0.2",
     "@chakra-ui/react": "^2.1.2",
@@ -16,6 +17,7 @@
     "@types/react-dom": "^18.0.5",
     "formik": "^2.2.9",
     "framer-motion": "^6.3.10",
+    "gh-pages": "^4.0.0",
     "luxon": "^2.4.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
@@ -26,6 +28,7 @@
     "yup": "^0.32.11"
   },
   "scripts": {
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
