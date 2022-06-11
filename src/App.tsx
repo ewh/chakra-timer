@@ -38,12 +38,6 @@ const getRemainingDuration = (
       countdown.start,
       now
     ).toDuration();
-    console.log(
-      'duration',
-      countdown.start.toString(),
-      now.toString(),
-      runningDuration.toString()
-    );
     let actualRemaining = countdown.duration.minus(runningDuration);
     let remainingDuration = actualRemaining;
     if (remainingDuration.milliseconds !== 0) {
@@ -52,23 +46,18 @@ const getRemainingDuration = (
       remainingDuration = Duration.fromMillis(remainingDurationMs);
     }
     if (actualRemaining.toMillis() < 0) {
-      console.log('zero correct', actualRemaining.toMillis());
       actualRemaining = Duration.fromMillis(0);
       remainingDuration = Duration.fromMillis(0);
     }
-    console.log(
-      'remaining',
-      actualRemaining.toMillis(),
-      remainingDuration.toMillis()
-    );
     return [actualRemaining, remainingDuration];
   }
 };
 
-const defaultDuration = Duration.fromObject({ minutes: 25, seconds: 0 });
+const initialDuration = Duration.fromObject({ minutes: 25, seconds: 0 });
 const refreshInterval = 500;
 
 function App() {
+  const [defaultDuration, setDefaultDuration] = useState(initialDuration);
   const [remaining, setRemaining] = useState(defaultDuration);
   const [actualRemaining, setActualRemaining] = useState(defaultDuration);
   const [isRunning, setIsRunning] = useState(false);
@@ -85,21 +74,12 @@ function App() {
           ...countdown,
           start,
         });
-        // console.log(
-        //   'in interval',
-        //   countdown.duration.toMillis(),
-        //   countdown.start?.toString(),
-        //   start.toString()
-        //   // durations?.[0]
-        // );
         if (durations) {
           const [actualRemaining, remainingDuration] = durations;
           if (durations !== undefined) {
-            // console.log('check', timerId, remainingDuration?.toMillis());
             setRemaining(remainingDuration);
             setActualRemaining(actualRemaining.normalize());
             if (actualRemaining.toMillis() <= 0) {
-              console.log('KILL', timerId, actualRemaining.toMillis());
               setIsRunning(false);
               clearInterval(timerId);
               setTimerId(null);
@@ -111,22 +91,19 @@ function App() {
       setTimerId(timerId);
 
       const now = DateTime.now();
-      console.log('start', countdown.duration.toMillis());
       const newCountdown = { ...countdown, start: now };
-      console.log('start', newCountdown);
       // countdown.start = now;
       const start = now;
       setCountdown(newCountdown);
     } else if (!isRunning && timerId) {
-      console.log('stop system', countdown.duration.toMillis());
       clearInterval(timerId);
       setTimerId(null);
       const durations = getRemainingDuration(countdown);
       if (durations) {
-        let [actualRemainging, remainingDuration] = durations;
+        let [actualRemaining, remainingDuration] = durations;
         setRemaining(remainingDuration);
         setActualRemaining(actualRemaining);
-        setCountdown({ duration: actualRemainging });
+        setCountdown({ duration: actualRemaining });
       }
     }
   }, [countdown, isRunning, timerId, actualRemaining, remaining]);
@@ -192,13 +169,17 @@ function App() {
             {formVisible ? (
               <HStack>
                 <Formik
-                  initialValues={{ minutes: '25', seconds: '00' }}
+                  initialValues={{
+                    minutes: defaultDuration.minutes.toString(),
+                    seconds: defaultDuration.seconds.toString(),
+                  }}
                   onSubmit={(values, actions) => {
                     const { minutes, seconds } = values;
                     const duration = Duration.fromObject({
                       minutes: parseInt(minutes),
                       seconds: parseInt(seconds),
                     });
+                    setDefaultDuration(duration);
                     setCountdown({ duration });
                     setActualRemaining(duration);
                     setRemaining(duration);
@@ -229,14 +210,24 @@ function App() {
                           </FormControl>
                         )}
                       </Field>
-                      <Button
-                        mt={4}
-                        colorScheme="teal"
-                        isLoading={props.isSubmitting}
-                        type="submit"
-                      >
-                        Submit
-                      </Button>
+                      <HStack>
+                        <Button
+                          my={2}
+                          colorScheme="teal"
+                          isLoading={props.isSubmitting}
+                          type="submit"
+                        >
+                          Set Timer
+                        </Button>
+                        <Button
+                          my={2}
+                          colorScheme="teal"
+                          isLoading={props.isSubmitting}
+                          type="reset"
+                        >
+                          Reset
+                        </Button>
+                      </HStack>
                     </Form>
                   )}
                 </Formik>
