@@ -2,7 +2,7 @@
 // import logo from './logo.svg';
 // import './App.css';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Field, FieldProps, Form, Formik } from 'formik';
 import * as Yup from 'yup';
 
@@ -78,11 +78,15 @@ function App() {
   const [remaining, setRemaining] = useState(defaultDuration);
   const [actualRemaining, setActualRemaining] = useState(defaultDuration);
   const [isRunning, setIsRunning] = useState(false);
+  const [didStop, setDidStop] = useState(false);
+  const [didReset, setDidReset] = useState(false);
   const [timerId, setTimerId] = useState<number | null>(null);
   const [countdown, setCountdown] = useState<Countdown>({
     duration: defaultDuration,
   });
   const [formVisible, setFormVisible] = useState(false);
+  const refPlayButton = useRef<HTMLButtonElement>(null);
+  const refResetButton = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (isRunning && !timerId) {
@@ -100,6 +104,7 @@ function App() {
               setIsRunning(false);
               clearInterval(timerId);
               setTimerId(null);
+              setDidStop(true);
               notify();
             }
           }
@@ -123,7 +128,23 @@ function App() {
         setCountdown({ duration: actualRemaining });
       }
     }
-  }, [countdown, isRunning, timerId, actualRemaining, remaining]);
+    if (didStop) {
+      refResetButton.current!.focus();
+      setDidStop(false);
+    }
+    if (didReset) {
+      refPlayButton.current!.focus();
+      setDidReset(false);
+    }
+  }, [
+    countdown,
+    isRunning,
+    timerId,
+    actualRemaining,
+    remaining,
+    didReset,
+    didStop,
+  ]);
 
   // useEffect(() => {
   //   console.log('REMAINING', remaining.toFormat('m:ss'));
@@ -135,6 +156,7 @@ function App() {
 
   const isDone = remaining.toMillis() === 0;
   const bgColor = isDone ? 'red.400' : 'gray.50';
+  const timerColor = isRunning ? 'green.500' : 'red.500';
 
   return (
     <ChakraProvider>
@@ -146,6 +168,7 @@ function App() {
                 m={2}
                 minW="20"
                 isDisabled={isDone}
+                ref={refPlayButton}
                 onClick={() => {
                   setIsRunning(!isRunning);
                 }}
@@ -160,18 +183,22 @@ function App() {
                 m={2}
                 minW="20"
                 isDisabled={isRunning}
+                ref={refResetButton}
                 onClick={() => {
                   if (!isRunning) {
                     setRemaining(defaultDuration);
                     setActualRemaining(defaultDuration);
                     setCountdown({ duration: defaultDuration });
                     setTimerId(null);
+                    setDidReset(true);
                   }
                 }}
               >
                 <MyIcon label="Reset" icon={MdRotateLeft} />
               </Button>
-              <Heading m={2}>{remaining.toFormat('m:ss')}</Heading>
+              <Heading color={timerColor} m={2}>
+                {remaining.toFormat('m:ss')}
+              </Heading>
               {/* <Heading m={2}>{actualRemaining.toFormat('m:ss.SSS')}</Heading> */}
               <Button
                 m={2}
